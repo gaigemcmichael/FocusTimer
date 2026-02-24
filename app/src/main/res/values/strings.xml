@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">FocusTimer</string>
+    <string name="app_name">Focus Timer</string>
+    <string name="login_title">Login</string>
+    <string name="username_box">Username</string>
+    <string name="password_box">Password</string>
+    <string name="sign_up_text">Don\'t have an account?</string>
+    <string name="sign_up_title">Sign Up</string>
+    <string name="name_box">Name</string>
+    <string name="password_confirm_box">Confirm Password</string>
+    <string name="login_text">Already have an account?</string>
 </resources>
