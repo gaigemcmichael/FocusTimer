@@ -8,4 +8,6 @@
     <string name="name_box">Name</string>
     <string name="password_confirm_box">Confirm Password</string>
     <string name="login_text">Already have an account?</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="home_page_title">Home</string>
 </resources>

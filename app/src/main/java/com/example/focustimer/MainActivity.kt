@@ -23,12 +23,5 @@ class MainActivity : AppCompatActivity() {
         val toolbar = findViewById<MaterialToolbar>(R.id.topAppBar)
         setSupportActionBar(toolbar)
         supportActionBar?.title = "Focus Timer"
-
-        // Load Log In screen as first screen
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, LoginFragment())
-                .commit()
-        }
     }
 }
