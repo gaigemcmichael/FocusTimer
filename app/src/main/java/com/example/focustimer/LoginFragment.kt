@@ -33,8 +33,16 @@ class LoginFragment : Fragment() {
             val username = binding.usernameBox.text.toString()
             val password = binding.passwordBox.text.toString()
 
+            // handle username/password validation against saved user data
+
             findNavController().navigate(
                 R.id.action_loginFragment_to_homeFragment
+            )
+        }
+
+        binding.signUpNavButton.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_loginFragment_to_signUpFragment
             )
         }
     }
