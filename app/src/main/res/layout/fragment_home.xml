@@ -16,4 +16,40 @@
         android:textStyle="bold"
         />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/home_page_focus_message"
+        android:textSize="20sp"
+        />
+
+    <Button
+        android:id="@+id/start_a_focus_session_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/start_a_focus_session"
+        android:textSize="20sp"/>
+
+    <Button
+        android:id="@+id/to_do_list_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/to_do_list"
+        android:textSize="20sp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/home_page_focus_score_message"
+        android:textSize="20sp"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/home_page_tasks_message"
+        android:textSize="20sp"
+        />
+
+
 </LinearLayout>
