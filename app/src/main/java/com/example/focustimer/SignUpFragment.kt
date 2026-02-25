@@ -46,8 +46,13 @@ class SignUpFragment : Fragment() {
 
             // handle username/name/password sign-up
 
+
             findNavController().navigate(
-                R.id.action_signUpFragment_to_homeFragment
+                R.id.homeFragment,
+                null,
+                androidx.navigation.NavOptions.Builder()
+                    .setPopUpTo(R.id.signUpFragment, true)
+                    .build()
             )
         }
 
@@ -84,8 +89,9 @@ class SignUpFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         Log.d(TAG, "SignUpFragment onDestroy() called")
+        super.onDestroy()
+        //Log.d(TAG, "SignUpFragment onDestroy() called")
     }
 
 }

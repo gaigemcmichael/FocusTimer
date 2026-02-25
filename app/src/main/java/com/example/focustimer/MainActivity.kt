@@ -49,7 +49,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         Log.d(TAG, "MainActivity onDestroy() called")
+        super.onDestroy()
+        //Log.d(TAG, "MainActivity onDestroy() called")
     }
 }

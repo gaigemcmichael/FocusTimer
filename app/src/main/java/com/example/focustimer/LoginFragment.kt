@@ -45,7 +45,11 @@ class LoginFragment : Fragment() {
             // handle username/password validation against saved user data
 
             findNavController().navigate(
-                R.id.action_loginFragment_to_homeFragment
+                R.id.homeFragment,
+                null,
+                androidx.navigation.NavOptions.Builder()
+                    .setPopUpTo(R.id.loginFragment, true)
+                    .build()
             )
         }
 
@@ -83,7 +87,8 @@ class LoginFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         Log.d(TAG, "LoginFragment onDestroy() called")
+        super.onDestroy()
+        //Log.d(TAG, "LoginFragment onDestroy() called")
     }
 }
