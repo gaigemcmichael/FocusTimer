@@ -91,7 +91,6 @@ class SignUpFragment : Fragment() {
     override fun onDestroy() {
         Log.d(TAG, "SignUpFragment onDestroy() called")
         super.onDestroy()
-        //Log.d(TAG, "SignUpFragment onDestroy() called")
     }
 
 }

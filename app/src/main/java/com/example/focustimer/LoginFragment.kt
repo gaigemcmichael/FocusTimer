@@ -89,6 +89,5 @@ class LoginFragment : Fragment() {
     override fun onDestroy() {
         Log.d(TAG, "LoginFragment onDestroy() called")
         super.onDestroy()
-        //Log.d(TAG, "LoginFragment onDestroy() called")
     }
 }

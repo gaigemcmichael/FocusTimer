@@ -14,5 +14,4 @@
     <string name="to_do_list">To-Do List</string>
     <string name="home_page_focus_score_message"> Average focus score: %</string>
     <string name="home_page_tasks_message">Tasks due in the next week: </string>
-    <string name="login_button_on_sign_up_page_text">Already have an account?</string>
 </resources>
