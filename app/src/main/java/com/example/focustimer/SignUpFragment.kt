@@ -6,18 +6,20 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.example.focustimer.databinding.FragmentLoginBinding
 import com.example.focustimer.databinding.FragmentSignUpBinding
 
-
 private const val TAG = "SignUpFragment"
+
 class SignUpFragment : Fragment() {
 
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
 
+    private val viewModel: UserViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,23 +39,20 @@ class SignUpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "SignUpFragment onViewCreated() called")
-        binding.loginNavButton.paintFlags = binding.loginNavButton.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+        binding.loginNavButton.paintFlags =
+            binding.loginNavButton.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
         binding.signUpButton.setOnClickListener {
-            val username= binding.usernameBox.text.toString()
+            val username = binding.usernameBox.text.toString()
             val name = binding.nameBox.text.toString()
             val password = binding.passwordBox.text.toString()
 
-            // handle username/name/password sign-up
-
-
-            findNavController().navigate(
-                R.id.homeFragment,
-                null,
-                androidx.navigation.NavOptions.Builder()
-                    .setPopUpTo(R.id.signUpFragment, true)
-                    .build()
-            )
+            if (username.isBlank() || name.isBlank() || password.isBlank()) {
+                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT)
+                    .show()
+            } else {
+                viewModel.signUp(username, name, password)
+            }
         }
 
         binding.loginNavButton.setOnClickListener {
@@ -61,7 +60,26 @@ class SignUpFragment : Fragment() {
                 R.id.action_signUpFragment_to_loginFragment
             )
         }
+
+        viewModel.userResult.observe(viewLifecycleOwner) { user ->
+            if (user != null) {
+                findNavController().navigate(
+                    R.id.action_signUpFragment_to_homeFragment,
+                    null,
+                    androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.loginFragment, true)
+                        .build()
+                )
+            }
+        }
+
+        viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
+            if (message != null) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         Log.d(TAG, "SignUpFragment onDestroyView() called")

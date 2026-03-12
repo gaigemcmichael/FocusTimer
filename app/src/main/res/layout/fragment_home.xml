@@ -14,13 +14,16 @@
         android:text="@string/home_page_title"
         android:textSize="32sp"
         android:textStyle="bold"
+        android:layout_marginBottom="16dp"
         />
 
     <TextView
+        android:id="@+id/welcome_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/home_page_focus_message"
         android:textSize="20sp"
+        android:layout_marginBottom="16dp"
         />
 
     <Button
@@ -42,6 +45,7 @@
         android:layout_height="wrap_content"
         android:text="@string/home_page_focus_score_message"
         android:textSize="20sp"
+        android:layout_marginTop="24dp"
         />
 
     <TextView

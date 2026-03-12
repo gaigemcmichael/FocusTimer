@@ -3,19 +3,24 @@ package com.example.focustimer
 import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.focustimer.databinding.FragmentLoginBinding
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.example.focustimer.databinding.FragmentLoginBinding
 
 private const val TAG = "LoginFragment"
+
 class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
 
+    // Use activityViewModels to share state with HomeFragment
+    private val viewModel: UserViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,21 +47,36 @@ class LoginFragment : Fragment() {
             val username = binding.usernameBox.text.toString()
             val password = binding.passwordBox.text.toString()
 
-            // handle username/password validation against saved user data
-
-            findNavController().navigate(
-                R.id.homeFragment,
-                null,
-                androidx.navigation.NavOptions.Builder()
-                    .setPopUpTo(R.id.loginFragment, true)
-                    .build()
-            )
+            if (username.isBlank() || password.isBlank()) {
+                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT)
+                    .show()
+            } else {
+                viewModel.login(username, password)
+            }
         }
 
         binding.signUpNavButton.setOnClickListener {
             findNavController().navigate(
                 R.id.action_loginFragment_to_signUpFragment
             )
+        }
+
+        viewModel.userResult.observe(viewLifecycleOwner) { user ->
+            if (user != null) {
+                findNavController().navigate(
+                    R.id.action_loginFragment_to_homeFragment,
+                    null,
+                    androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.loginFragment, true)
+                        .build()
+                )
+            }
+        }
+
+        viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
+            if (message != null) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
