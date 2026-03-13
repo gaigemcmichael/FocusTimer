@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.focustimer.databinding.FragmentSignUpBinding
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 
 private const val TAG = "SignUpFragment"
 
@@ -51,7 +53,23 @@ class SignUpFragment : Fragment() {
                 Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT)
                     .show()
             } else {
-                viewModel.signUp(username, name, password)
+                try {
+                    val digest = MessageDigest.getInstance("SHA-256")
+                    val sha256HashBytes = digest.digest(password.toByteArray(StandardCharsets.UTF_8))
+
+                    // Standard Kotlin way to convert bytes to Hex string
+                    val sha256HashStr = sha256HashBytes.joinToString("") { "%02x".format(it) }
+
+                    viewModel.signUp(username, name, sha256HashStr)
+                    //Debugging:
+                    // Toast.makeText(requireContext(), "New UserAccount $username added", Toast.LENGTH_SHORT).show()
+
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error hashing password", e)
+                    Toast.makeText(requireContext(), "Error hashing password", Toast.LENGTH_SHORT).show()
+
+                }
+
             }
         }
 
