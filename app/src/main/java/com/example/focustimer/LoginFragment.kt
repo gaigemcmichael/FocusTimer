@@ -62,7 +62,7 @@ class LoginFragment : Fragment() {
 
                     viewModel.login(username, sha256HashStr)
                     //Debugging:
-                    // Toast.makeText(requireContext(), "UserAccount $username logged in", Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(requireContext(), "User account $username logged in", Toast.LENGTH_SHORT).show()
 
                 } catch (e: Exception) {
                     Log.e(TAG, "Error hashing password, loginFragment", e)

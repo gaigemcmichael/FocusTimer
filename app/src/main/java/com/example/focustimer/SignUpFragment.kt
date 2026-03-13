@@ -62,12 +62,11 @@ class SignUpFragment : Fragment() {
 
                     viewModel.signUp(username, name, sha256HashStr)
                     //Debugging:
-                    // Toast.makeText(requireContext(), "New UserAccount $username added", Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(requireContext(), "New user account $username added", Toast.LENGTH_SHORT).show()
 
                 } catch (e: Exception) {
                     Log.e(TAG, "Error hashing password", e)
                     Toast.makeText(requireContext(), "Error hashing password", Toast.LENGTH_SHORT).show()
-
                 }
 
             }

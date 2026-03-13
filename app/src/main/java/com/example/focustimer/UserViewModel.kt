@@ -13,6 +13,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     val userResult = MutableLiveData<User?>()
     val errorMessage = MutableLiveData<String?>()
+    val deleteSuccess = MutableLiveData<Boolean>()
 
     fun signUp(username: String, name: String, password: String) {
         viewModelScope.launch {
@@ -30,12 +31,26 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     fun login(username: String, password: String) {
         viewModelScope.launch {
             val user = repository.getUserByUsername(username)
-            // rework authentication to actually check hashed passwords match or another auth method
             if (user != null && user.password == password) {
                 userResult.value = user
             } else {
                 errorMessage.value = "Invalid username or password"
             }
+        }
+    }
+
+    fun updateUser(user: User) {
+        viewModelScope.launch {
+            repository.updateUser(user)
+            userResult.value = user
+        }
+    }
+
+    fun deleteUser(user: User) {
+        viewModelScope.launch {
+            repository.deleteUser(user)
+            userResult.value = null
+            deleteSuccess.value = true
         }
     }
 }

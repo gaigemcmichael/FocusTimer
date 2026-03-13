@@ -5,8 +5,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.example.focustimer.databinding.FragmentHomeBinding
 
 private const val TAG = "HomeFragment"
@@ -39,6 +42,30 @@ class HomeFragment : Fragment() {
                 binding.welcomeText.text = getString(R.string.home_page_focus_message, firstName)
             } else {
                 Log.d(TAG, "User is null in HomeFragment")
+            }
+        }
+
+        binding.updateAccountButton.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_updateUserFragment)
+        }
+
+        binding.deleteAccountButton.setOnClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Delete Account")
+                .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
+                .setPositiveButton("Delete") { _, _ ->
+                    viewModel.userResult.value?.let { user ->
+                        viewModel.deleteUser(user)
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
+        viewModel.deleteSuccess.observe(viewLifecycleOwner) { success ->
+            if (success) {
+                Toast.makeText(requireContext(), "Account deleted successfully", Toast.LENGTH_SHORT).show()
+                findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
             }
         }
     }

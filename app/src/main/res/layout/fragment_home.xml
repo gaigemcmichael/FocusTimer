@@ -55,5 +55,25 @@
         android:textSize="20sp"
         />
 
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/update_account_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/update_account"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="#9E9E9E" />
+
+    <Button
+        android:id="@+id/delete_account_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/delete_account"
+        android:textColor="@color/white"
+        android:backgroundTint="#D32F2F" />
 
 </LinearLayout>
