@@ -1,4 +1,4 @@
-package com.example.focustimer.data
+package com.example.focustimer.data.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.example.focustimer.data.model.User
 
 @Dao
 interface UserDao {

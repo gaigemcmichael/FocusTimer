@@ -1,4 +1,4 @@
-package com.example.focustimer
+package com.example.focustimer.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -10,6 +10,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.example.focustimer.R
+import com.example.focustimer.data.viewmodel.UserViewModel
 import com.example.focustimer.databinding.FragmentHomeBinding
 
 private const val TAG = "HomeFragment"

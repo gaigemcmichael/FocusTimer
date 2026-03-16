@@ -1,10 +1,11 @@
-package com.example.focustimer
+package com.example.focustimer.data.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.focustimer.data.User
+import com.example.focustimer.data.FocusTimerApplication
+import com.example.focustimer.data.model.User
 import kotlinx.coroutines.launch
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {

@@ -1,4 +1,7 @@
-package com.example.focustimer.data
+package com.example.focustimer.data.repository
+
+import com.example.focustimer.data.dao.UserDao
+import com.example.focustimer.data.model.User
 
 class UserRepository(private val userDao: UserDao) {
     suspend fun getUserByUsername(username: String): User? {

@@ -1,4 +1,4 @@
-package com.example.focustimer
+package com.example.focustimer.ui
 
 import android.os.Bundle
 import android.util.Log

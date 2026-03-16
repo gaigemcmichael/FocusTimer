@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.focustimer.LoginFragment"
+        android:name="com.example.focustimer.ui.LoginFragment"
         android:label="Login">
         <action
             android:id="@+id/action_loginFragment_to_homeFragment"
@@ -18,7 +18,7 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.focustimer.HomeFragment"
+        android:name="com.example.focustimer.ui.HomeFragment"
         android:label="Home">
         <action
             android:id="@+id/action_homeFragment_to_updateUserFragment"
@@ -35,7 +35,7 @@
 
     <fragment
         android:id="@+id/signUpFragment"
-        android:name="com.example.focustimer.SignUpFragment"
+        android:name="com.example.focustimer.ui.SignUpFragment"
         android:label="SignUp" >
         <action
             android:id="@+id/action_signUpFragment_to_loginFragment"
@@ -47,12 +47,12 @@
 
     <fragment
         android:id="@+id/updateUserFragment"
-        android:name="com.example.focustimer.UpdateUserFragment"
+        android:name="com.example.focustimer.ui.UpdateUserFragment"
         android:label="Update Account" />
 
     <fragment
         android:id="@+id/focusSelectionFragment"
-        android:name="com.example.focustimer.FocusSelectionFragment"
+        android:name="com.example.focustimer.ui.FocusSelectionFragment"
         android:label="Focus Session" />
 
 </navigation>

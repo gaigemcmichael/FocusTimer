@@ -1,4 +1,4 @@
-package com.example.focustimer
+package com.example.focustimer.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.example.focustimer.data.viewmodel.UserViewModel
 import com.example.focustimer.databinding.FragmentUpdateUserBinding
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest

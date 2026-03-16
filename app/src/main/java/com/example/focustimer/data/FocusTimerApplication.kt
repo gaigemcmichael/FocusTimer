@@ -1,8 +1,7 @@
-package com.example.focustimer
+package com.example.focustimer.data
 
 import android.app.Application
-import com.example.focustimer.data.FocusTimerDatabase
-import com.example.focustimer.data.UserRepository
+import com.example.focustimer.data.repository.UserRepository
 
 class FocusTimerApplication : Application() {
     val database by lazy { FocusTimerDatabase.getDatabase(this) }

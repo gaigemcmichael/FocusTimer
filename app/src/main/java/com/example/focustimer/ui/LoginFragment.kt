@@ -1,4 +1,4 @@
-package com.example.focustimer
+package com.example.focustimer.ui
 
 import android.graphics.Paint
 import android.os.Bundle
@@ -9,7 +9,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
+import com.example.focustimer.R
+import com.example.focustimer.data.viewmodel.UserViewModel
 import com.example.focustimer.databinding.FragmentLoginBinding
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -84,7 +87,7 @@ class LoginFragment : Fragment() {
                 findNavController().navigate(
                     R.id.action_loginFragment_to_homeFragment,
                     null,
-                    androidx.navigation.NavOptions.Builder()
+                    NavOptions.Builder()
                         .setPopUpTo(R.id.loginFragment, true)
                         .build()
                 )
