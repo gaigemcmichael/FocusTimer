@@ -45,6 +45,10 @@ class HomeFragment : Fragment() {
             }
         }
 
+        binding.startAFocusSessionButton.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_focusSelectionFragment)
+        }
+
         binding.updateAccountButton.setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_updateUserFragment)
         }

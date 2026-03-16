@@ -66,7 +66,7 @@
         android:layout_height="wrap_content"
         android:text="@string/update_account"
         android:layout_marginBottom="8dp"
-        android:backgroundTint="#9E9E9E" />
+        android:backgroundTint="?attr/colorPrimary" />
 
     <Button
         android:id="@+id/delete_account_button"
@@ -74,6 +74,6 @@
         android:layout_height="wrap_content"
         android:text="@string/delete_account"
         android:textColor="@color/white"
-        android:backgroundTint="#D32F2F" />
+        android:backgroundTint="?attr/colorSecondary" />
 
 </LinearLayout>

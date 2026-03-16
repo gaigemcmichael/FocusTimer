@@ -17,4 +17,12 @@
     <string name="update_account">Update Account</string>
     <string name="update_button_text">Update</string>
     <string name="delete_account">Delete Account</string>
+    <string name="focus_session_title">Focus Session</string>
+    <string name="pick_focus_method">Pick a Focus Method</string>
+    <string name="classic_method">Classic</string>
+    <string name="classic_description">Set your own timer</string>
+    <string name="pomodoro_method">Pomodoro</string>
+    <string name="pomodoro_description">(25min focus - 5min break) x4 then 25min break</string>
+    <string name="flowmodoro_method">Flowmodoro</string>
+    <string name="flowmodoro_description">Focus for a session, get 1/5 as long break</string>
 </resources>

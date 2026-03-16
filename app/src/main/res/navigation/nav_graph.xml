@@ -28,6 +28,9 @@
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_homeFragment_to_focusSelectionFragment"
+            app:destination="@id/focusSelectionFragment" />
     </fragment>
 
     <fragment
@@ -46,5 +49,10 @@
         android:id="@+id/updateUserFragment"
         android:name="com.example.focustimer.UpdateUserFragment"
         android:label="Update Account" />
+
+    <fragment
+        android:id="@+id/focusSelectionFragment"
+        android:name="com.example.focustimer.FocusSelectionFragment"
+        android:label="Focus Session" />
 
 </navigation>
