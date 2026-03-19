@@ -51,6 +51,10 @@ class HomeFragment : Fragment() {
             findNavController().navigate(R.id.action_homeFragment_to_focusSelectionFragment)
         }
 
+        binding.toDoListButton.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_toDoListFragment)
+        }
+
         binding.updateAccountButton.setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_updateUserFragment)
         }

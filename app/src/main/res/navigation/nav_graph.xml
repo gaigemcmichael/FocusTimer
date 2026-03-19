@@ -31,6 +31,9 @@
         <action
             android:id="@+id/action_homeFragment_to_focusSelectionFragment"
             app:destination="@id/focusSelectionFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_toDoListFragment"
+            app:destination="@id/toDoListFragment" />
     </fragment>
 
     <fragment
@@ -54,5 +57,10 @@
         android:id="@+id/focusSelectionFragment"
         android:name="com.example.focustimer.ui.FocusSelectionFragment"
         android:label="Focus Session" />
+
+    <fragment
+        android:id="@+id/toDoListFragment"
+        android:name="com.example.focustimer.ui.ToDoListFragment"
+        android:label="To Do List" />
 
 </navigation>

@@ -25,4 +25,9 @@
     <string name="pomodoro_description">(25min focus - 5min break) x4 then 25min break</string>
     <string name="flowmodoro_method">Flowmodoro</string>
     <string name="flowmodoro_description">Focus for a session, get 1/5 as long break</string>
+    <string name="to_do_list_title">To-Do List</string>
+    <string name="add_task_button">+ Add Task</string>
+    <string name="completed_tasks_button">Completed Tasks</string>
+    <string name="link_calendar_button">Link Google Calendar</string>
+    <string name="due_date">Due: %1$s</string>
 </resources>
