@@ -77,6 +77,7 @@ class LoginFragment : Fragment() {
         }
 
         binding.signUpNavButton.setOnClickListener {
+            viewModel.errorMessage.value = null
             findNavController().navigate(
                 R.id.action_loginFragment_to_signUpFragment
             )

@@ -74,6 +74,7 @@ class HomeFragment : Fragment() {
 
         viewModel.deleteSuccess.observe(viewLifecycleOwner) { success ->
             if (success) {
+                viewModel.deleteSuccess.value = false
                 Toast.makeText(requireContext(), "Account deleted successfully", Toast.LENGTH_SHORT).show()
                 findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
             }
