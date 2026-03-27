@@ -14,15 +14,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.focustimer.R
 import com.example.focustimer.data.model.Task
 import com.example.focustimer.data.viewmodel.TaskViewModel
-import com.example.focustimer.databinding.FragmentToDoListBinding
+import com.example.focustimer.databinding.FragmentCompletedTasksBinding
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-private const val TAG = "ToDoListFragment"
+private const val TAG = "CompletedTasksFragment"
 
-class ToDoListFragment : Fragment() {
+class CompletedTasksFragment : Fragment() {
 
-    private var _binding: FragmentToDoListBinding? = null
+    private var _binding: FragmentCompletedTasksBinding? = null
     private val binding get() = _binding!!
 
     private val taskViewModel: TaskViewModel by activityViewModels()
@@ -32,28 +32,20 @@ class ToDoListFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        Log.d(TAG, "ToDoListFragment onCreateView() called")
-        _binding = FragmentToDoListBinding.inflate(inflater, container, false)
+        Log.d(TAG, "CompletedTasksFragment onCreateView() called")
+        _binding = FragmentCompletedTasksBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d(TAG, "ToDoListFragment onViewCreated() called")
+        Log.d(TAG, "CompletedTasksFragment onViewCreated() called")
 
-        binding.taskRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.completedTaskRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        taskViewModel.incompleteTasks.observe(viewLifecycleOwner) { tasks ->
-            val adapter = TaskAdapter(tasks)
-            binding.taskRecyclerView.swapAdapter(adapter, true)
-        }
-
-        binding.addTaskButton.setOnClickListener {
-            findNavController().navigate(R.id.action_toDoListFragment_to_createTaskFragment)
-        }
-
-        binding.completedTasksButton.setOnClickListener {
-            findNavController().navigate(R.id.action_toDoListFragment_to_completedTasksFragment)
+        taskViewModel.completedTasks.observe(viewLifecycleOwner) { tasks ->
+            val adapter = CompletedTaskAdapter(tasks)
+            binding.completedTaskRecyclerView.swapAdapter(adapter, true)
         }
     }
 
@@ -73,20 +65,20 @@ class ToDoListFragment : Fragment() {
             dueDateTextView.text = itemView.context.getString(
                 R.string.due_date, dateFormat.format(task.dueDate)
             )
-            // Use the description property on the enum
+            // Display the enum description
             statusTextView.text = task.status.description
             
             itemView.setOnClickListener { onClick(task) }
         }
     }
 
-    private inner class TaskAdapter(private val mTaskList: List<Task>) :
+    private inner class CompletedTaskAdapter(private val mTaskList: List<Task>) :
         RecyclerView.Adapter<TaskHolder>() {
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskHolder {
             val inflater = LayoutInflater.from(requireContext())
             return TaskHolder(inflater, parent) { task ->
-                val action = ToDoListFragmentDirections.actionToDoListFragmentToUpdateTaskFragment(task.id)
+                val action = CompletedTasksFragmentDirections.actionCompletedTasksFragmentToUpdateTaskFragment(task.id)
                 findNavController().navigate(action)
             }
         }
@@ -101,32 +93,32 @@ class ToDoListFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.d(TAG, "ToDoListFragment onDestroyView() called")
+        Log.d(TAG, "CompletedTasksFragment onDestroyView() called")
         _binding = null
     }
 
     override fun onStart() {
         super.onStart()
-        Log.d(TAG, "ToDoListFragment onStart() called")
+        Log.d(TAG, "CompletedTasksFragment onStart() called")
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d(TAG, "ToDoListFragment onResume() called")
+        Log.d(TAG, "CompletedTasksFragment onResume() called")
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d(TAG, "ToDoListFragment onPause() called")
+        Log.d(TAG, "CompletedTasksFragment onPause() called")
     }
 
     override fun onStop() {
         super.onStop()
-        Log.d(TAG, "ToDoListFragment onStop() called")
+        Log.d(TAG, "CompletedTasksFragment onStop() called")
     }
 
     override fun onDestroy() {
-        Log.d(TAG, "ToDoListFragment onDestroy() called")
+        Log.d(TAG, "CompletedTasksFragment onDestroy() called")
         super.onDestroy()
     }
 }

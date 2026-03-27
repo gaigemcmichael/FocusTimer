@@ -61,6 +61,39 @@
     <fragment
         android:id="@+id/toDoListFragment"
         android:name="com.example.focustimer.ui.ToDoListFragment"
-        android:label="To Do List" />
+        android:label="To Do List">
+        <action
+            android:id="@+id/action_toDoListFragment_to_createTaskFragment"
+            app:destination="@id/createTaskFragment" />
+        <action
+            android:id="@+id/action_toDoListFragment_to_updateTaskFragment"
+            app:destination="@id/updateTaskFragment" />
+        <action
+            android:id="@+id/action_toDoListFragment_to_completedTasksFragment"
+            app:destination="@id/completedTasksFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createTaskFragment"
+        android:name="com.example.focustimer.ui.CreateTaskFragment"
+        android:label="New Task" />
+
+    <fragment
+        android:id="@+id/updateTaskFragment"
+        android:name="com.example.focustimer.ui.UpdateTaskFragment"
+        android:label="Update Task">
+        <argument
+            android:name="taskId"
+            app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/completedTasksFragment"
+        android:name="com.example.focustimer.ui.CompletedTasksFragment"
+        android:label="Completed Tasks">
+        <action
+            android:id="@+id/action_completedTasksFragment_to_updateTaskFragment"
+            app:destination="@id/updateTaskFragment" />
+    </fragment>
 
 </navigation>

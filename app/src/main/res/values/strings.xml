@@ -30,4 +30,16 @@
     <string name="completed_tasks_button">Completed Tasks</string>
     <string name="link_calendar_button">Link Google Calendar</string>
     <string name="due_date">Due: %1$s</string>
+    <string name="create_task_title">Create New Task</string>
+    <string name="task_title">Task Title</string>
+    <string name="task_description">Description</string>
+    <string name="select_due_date">Select Due Date</string>
+    <string name="save_task">Save Task</string>
+    <string name="update_task_title">Update Task</string>
+    <string name="change_due_date">Change Due Date</string>
+    <string name="no_date_selected">No date selected</string>
+    <string name="status_label">Status:</string>
+    <string name="delete_task">Delete Task</string>
+    <string name="loading">Loading…</string>
+    <string name="completed">Complete Task</string>
 </resources>

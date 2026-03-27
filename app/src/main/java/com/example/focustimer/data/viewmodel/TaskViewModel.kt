@@ -1,33 +1,54 @@
 package com.example.focustimer.data.viewmodel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.focustimer.data.FocusTimerApplication
 import com.example.focustimer.data.model.Task
-import java.util.Calendar
+import com.example.focustimer.data.model.TaskStatus
+import kotlinx.coroutines.launch
+import java.util.Date
 
-class TaskViewModel : ViewModel() {
+class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _tasks = MutableLiveData<List<Task>>()
-    val tasks: LiveData<List<Task>> get() = _tasks
+    private val repository = (application as FocusTimerApplication).taskRepository
 
-    init {
-        loadFakeData()
+    val incompleteTasks: LiveData<List<Task>> = repository.incompleteTasks
+    val completedTasks: LiveData<List<Task>> = repository.completedTasks
+
+    private val _taskToUpdate = MutableLiveData<Task?>()
+    val taskToUpdate: LiveData<Task?> get() = _taskToUpdate
+
+    fun addTask(title: String, description: String, dueDate: Date) {
+        viewModelScope.launch {
+            val newTask = Task(
+                title = title,
+                description = description,
+                createDate = Date(),
+                dueDate = dueDate,
+                status = TaskStatus.NEW
+            )
+            repository.insert(newTask)
+        }
     }
 
-    private fun loadFakeData() {
-        val calendar = Calendar.getInstance()
-        val today = calendar.time
-        
-        calendar.add(Calendar.DAY_OF_YEAR, 1)
-        val tomorrow = calendar.time
+    fun loadTaskById(taskId: Int) {
+        viewModelScope.launch {
+            _taskToUpdate.value = repository.getTaskById(taskId)
+        }
+    }
 
-        val fakeTasks = listOf(
-            Task(1, "Complete CSE5236 Project", "Finish the Focus Timer app implementation", today, tomorrow, "Pending"),
-            Task(2, "Buy Groceries", "Get milk, eggs, and bread", today, today, "Pending"),
-            Task(3, "Gym Session", "Leg day workout", today, tomorrow, "Completed"),
-            Task(4, "Read Book", "Read 20 pages of 'Atomic Habits'", today, tomorrow, "Pending")
-        )
-        _tasks.value = fakeTasks
+    fun updateTask(task: Task) {
+        viewModelScope.launch {
+            repository.update(task)
+        }
+    }
+
+    fun deleteTask(task: Task) {
+        viewModelScope.launch {
+            repository.delete(task)
+        }
     }
 }
