@@ -10,7 +10,7 @@ import com.example.focustimer.data.dao.UserDao
 import com.example.focustimer.data.model.Task
 import com.example.focustimer.data.model.User
 
-@Database(entities = [User::class, Task::class], version = 3, exportSchema = false)
+@Database(entities = [User::class, Task::class], version = 8, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class FocusTimerDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
@@ -28,6 +28,7 @@ abstract class FocusTimerDatabase : RoomDatabase() {
                             context.applicationContext,
                             FocusTimerDatabase::class.java, "focus_timer_database"
                         )
+                            .fallbackToDestructiveMigration()
                             .build()
                     }
                 }

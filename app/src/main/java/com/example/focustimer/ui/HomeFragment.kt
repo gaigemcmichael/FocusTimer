@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.focustimer.R
+import com.example.focustimer.data.viewmodel.TaskViewModel
 import com.example.focustimer.data.viewmodel.UserViewModel
 import com.example.focustimer.databinding.FragmentHomeBinding
 
@@ -21,7 +22,8 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: UserViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
+    private val taskViewModel: TaskViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,7 +39,7 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "HomeFragment onViewCreated() called")
 
-        viewModel.userResult.observe(viewLifecycleOwner) { user ->
+        userViewModel.userResult.observe(viewLifecycleOwner) { user ->
             if (user != null) {
                 // Extract only the first name (word) from the user's name
                 val firstName = user.name.split(" ").firstOrNull() ?: ""
@@ -45,6 +47,10 @@ class HomeFragment : Fragment() {
             } else {
                 Log.d(TAG, "User is null in HomeFragment")
             }
+        }
+
+        taskViewModel.tasksDueNextWeek.observe(viewLifecycleOwner) { count ->
+            binding.homePageTasksMessage.text = getString(R.string.home_page_tasks_message, count)
         }
 
         binding.startAFocusSessionButton.setOnClickListener {
@@ -64,17 +70,18 @@ class HomeFragment : Fragment() {
                 .setTitle("Delete Account")
                 .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
                 .setPositiveButton("Delete") { _, _ ->
-                    viewModel.userResult.value?.let { user ->
-                        viewModel.deleteUser(user)
+                    userViewModel.userResult.value?.let { user ->
+                        taskViewModel.deleteUserTasks(user.username)
+                        userViewModel.deleteUser(user)
                     }
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
         }
 
-        viewModel.deleteSuccess.observe(viewLifecycleOwner) { success ->
+        userViewModel.deleteSuccess.observe(viewLifecycleOwner) { success ->
             if (success) {
-                viewModel.deleteSuccess.value = false
+                userViewModel.deleteSuccess.value = false
                 Toast.makeText(requireContext(), "Account deleted successfully", Toast.LENGTH_SHORT).show()
                 findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
             }

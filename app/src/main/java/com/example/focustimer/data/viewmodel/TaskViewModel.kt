@@ -1,36 +1,110 @@
 package com.example.focustimer.data.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.switchMap
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.example.focustimer.data.FocusTimerApplication
 import com.example.focustimer.data.model.Task
 import com.example.focustimer.data.model.TaskStatus
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import java.util.Date
+
+private const val TAG = "TaskViewModel"
 
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = (application as FocusTimerApplication).taskRepository
+    private val app = application as FocusTimerApplication
+    private val repository = app.taskRepository
+    private val tasksService = app.googleTasksService
 
-    val incompleteTasks: LiveData<List<Task>> = repository.incompleteTasks
-    val completedTasks: LiveData<List<Task>> = repository.completedTasks
+    private val _currentUserId = MutableLiveData<String?>()
+
+    val incompleteTasks: LiveData<List<Task>> = _currentUserId.switchMap { userId ->
+        if (userId == null) MutableLiveData(emptyList())
+        else repository.getIncompleteTasksLiveData(userId)
+    }
+
+    val completedTasks: LiveData<List<Task>> = _currentUserId.switchMap { userId ->
+        if (userId == null) MutableLiveData(emptyList())
+        else repository.getCompletedTasksLiveData(userId)
+    }
+
+    val tasksDueNextWeek: LiveData<Int> = incompleteTasks.map { list ->
+        val calendar = Calendar.getInstance()
+        val now = calendar.time
+        calendar.add(Calendar.DAY_OF_YEAR, 7)
+        val nextWeek = calendar.time
+        list.count { it.dueDate in now..nextWeek }
+    }
 
     private val _taskToUpdate = MutableLiveData<Task?>()
     val taskToUpdate: LiveData<Task?> get() = _taskToUpdate
 
-    fun addTask(title: String, description: String, dueDate: Date) {
+    fun setCurrentUser(userId: String?) {
+        _currentUserId.value = userId
+    }
+
+    fun addTask(title: String, description: String, dueDate: Date, googleAccount: String? = null) {
+        val userId = _currentUserId.value ?: return
         viewModelScope.launch {
             val newTask = Task(
+                userId = userId,
                 title = title,
                 description = description,
                 createDate = Date(),
                 dueDate = dueDate,
                 status = TaskStatus.NEW
             )
-            repository.insert(newTask)
+            
+            val taskId = repository.insert(newTask)
+            
+            if (googleAccount != null) {
+                val remoteId = tasksService.pushTaskToGoogle(googleAccount, newTask)
+                if (remoteId != null) {
+                    repository.update(newTask.copy(id = taskId.toInt(), googleEventId = remoteId))
+                }
+            }
+        }
+    }
+
+    fun syncWithGoogleTasks(googleAccount: String) {
+        val userId = _currentUserId.value ?: return
+        Log.d(TAG, "Syncing with Google Tasks for: $googleAccount")
+        viewModelScope.launch {
+            try {
+                // Pull tasks from Calendar
+                // Pass the userId to fetchGoogleTasks so it can correctly construct Task objects
+                val remoteTasks = tasksService.fetchGoogleTasks(googleAccount, userId)
+                remoteTasks.forEach { task ->
+                    repository.insert(task)
+                }
+
+                // Push existing tasks in Room db without remoteId to calendar
+                val localTasks = repository.getIncompleteTasks(userId)
+                localTasks.forEach { task ->
+                    if (task.googleEventId == null) {
+                        // Check if this task title already exists in the remoteTasks we just fetched
+                        // to prevent creating duplicates on Calendar
+                        val alreadyOnGoogle = remoteTasks.any {
+                            it.title.equals(task.title, ignoreCase = true)
+                        }
+                        if (!alreadyOnGoogle) {
+                            val remoteId = tasksService.pushTaskToGoogle(googleAccount, task)
+                            if (remoteId != null) {
+                                repository.update(task.copy(googleEventId = remoteId))
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Sync failed", e)
+            }
         }
     }
 
@@ -40,15 +114,27 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun updateTask(task: Task) {
+    fun updateTask(task: Task, googleAccount: String? = null) {
         viewModelScope.launch {
             repository.update(task)
+            if (googleAccount != null && task.googleEventId != null) {
+                tasksService.updateGoogleTask(googleAccount, task)
+            }
         }
     }
 
-    fun deleteTask(task: Task) {
+    fun deleteTask(task: Task, googleAccount: String? = null) {
         viewModelScope.launch {
             repository.delete(task)
+            if (googleAccount != null && task.googleEventId != null) {
+                tasksService.deleteGoogleTask(googleAccount, task.googleEventId)
+            }
+        }
+    }
+
+    fun deleteUserTasks(userId: String) {
+        viewModelScope.launch {
+            repository.deleteTasksByUserId(userId)
         }
     }
 }

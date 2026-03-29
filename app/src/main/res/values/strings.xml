@@ -13,7 +13,7 @@
     <string name="start_a_focus_session">Start a Focus Session</string>
     <string name="to_do_list">To-Do List</string>
     <string name="home_page_focus_score_message"> Average focus score: %</string>
-    <string name="home_page_tasks_message">Tasks due in the next week: </string>
+    <string name="home_page_tasks_message">Tasks due in the next week: %1$d</string>
     <string name="update_account">Update Account</string>
     <string name="update_button_text">Update</string>
     <string name="delete_account">Delete Account</string>
@@ -40,6 +40,8 @@
     <string name="no_date_selected">No date selected</string>
     <string name="status_label">Status:</string>
     <string name="delete_task">Delete Task</string>
+    <string name="google_client_id">414431470546-nm2igt0f3o1tt3m58lpar3aunlo23655.apps.googleusercontent.com</string>
+    <string name="no_tasks">No tasks available</string>
+    <string name="no_completed_tasks">No completed tasks</string>
     <string name="loading">Loading…</string>
-    <string name="completed">Complete Task</string>
 </resources>

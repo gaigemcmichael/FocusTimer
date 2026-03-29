@@ -12,6 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.example.focustimer.R
+import com.example.focustimer.data.viewmodel.TaskViewModel
 import com.example.focustimer.data.viewmodel.UserViewModel
 import com.example.focustimer.databinding.FragmentSignUpBinding
 import java.nio.charset.StandardCharsets
@@ -24,7 +25,8 @@ class SignUpFragment : Fragment() {
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: UserViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
+    private val taskViewModel: TaskViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,15 +65,11 @@ class SignUpFragment : Fragment() {
                     // Standard Kotlin way to convert bytes to Hex string
                     val sha256HashStr = sha256HashBytes.joinToString("") { "%02x".format(it) }
 
-                    viewModel.signUp(username, name, sha256HashStr)
-                    //Debugging:
-                    //Toast.makeText(requireContext(), "New user account $username added", Toast.LENGTH_SHORT).show()
-
+                    userViewModel.signUp(username, name, sha256HashStr)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error hashing password", e)
                     Toast.makeText(requireContext(), "Error hashing password", Toast.LENGTH_SHORT).show()
                 }
-
             }
         }
 
@@ -81,8 +79,11 @@ class SignUpFragment : Fragment() {
             )
         }
 
-        viewModel.userResult.observe(viewLifecycleOwner) { user ->
+        userViewModel.userResult.observe(viewLifecycleOwner) { user ->
             if (user != null) {
+                // Set the current user for task filtering
+                taskViewModel.setCurrentUser(user.username)
+
                 findNavController().navigate(
                     R.id.action_signUpFragment_to_homeFragment,
                     null,
@@ -93,7 +94,7 @@ class SignUpFragment : Fragment() {
             }
         }
 
-        viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
+        userViewModel.errorMessage.observe(viewLifecycleOwner) { message ->
             if (message != null) {
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
             }
@@ -130,5 +131,4 @@ class SignUpFragment : Fragment() {
         Log.d(TAG, "SignUpFragment onDestroy() called")
         super.onDestroy()
     }
-
 }

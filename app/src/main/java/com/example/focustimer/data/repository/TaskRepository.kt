@@ -6,11 +6,20 @@ import com.example.focustimer.data.model.Task
 
 class TaskRepository(private val taskDao: TaskDao) {
 
-    val incompleteTasks: LiveData<List<Task>> = taskDao.getIncompleteTasks()
-    val completedTasks: LiveData<List<Task>> = taskDao.getCompletedTasks()
+    fun getIncompleteTasksLiveData(userId: String): LiveData<List<Task>> {
+        return taskDao.getIncompleteTasksLiveData(userId)
+    }
 
-    suspend fun insert(task: Task) {
-        taskDao.insertTask(task)
+    suspend fun getIncompleteTasks(userId: String): List<Task> {
+        return taskDao.getIncompleteTasks(userId)
+    }
+
+    fun getCompletedTasksLiveData(userId: String): LiveData<List<Task>> {
+        return taskDao.getCompletedTasksLiveData(userId)
+    }
+
+    suspend fun insert(task: Task): Long {
+        return taskDao.insertTask(task)
     }
 
     suspend fun update(task: Task) {
@@ -23,5 +32,9 @@ class TaskRepository(private val taskDao: TaskDao) {
 
     suspend fun getTaskById(taskId: Int): Task? {
         return taskDao.getTaskById(taskId)
+    }
+
+    suspend fun deleteTasksByUserId(userId: String) {
+        taskDao.deleteTasksByUserId(userId)
     }
 }

@@ -8,4 +8,5 @@ class FocusTimerApplication : Application() {
     val database by lazy { FocusTimerDatabase.getDatabase(this) }
     val repository by lazy { UserRepository(database.userDao()) }
     val taskRepository by lazy { TaskRepository(database.taskDao()) }
+    val googleTasksService by lazy { GoogleTasksService(this) }
 }

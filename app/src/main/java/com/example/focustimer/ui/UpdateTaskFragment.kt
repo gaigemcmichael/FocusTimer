@@ -16,6 +16,7 @@ import androidx.navigation.fragment.navArgs
 import com.example.focustimer.data.model.Task
 import com.example.focustimer.data.model.TaskStatus
 import com.example.focustimer.data.viewmodel.TaskViewModel
+import com.example.focustimer.data.viewmodel.UserViewModel
 import com.example.focustimer.databinding.FragmentUpdateTaskBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -30,6 +31,7 @@ class UpdateTaskFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val taskViewModel: TaskViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
     private val args: UpdateTaskFragmentArgs by navArgs()
     
     private var selectedDueDate: Date? = null
@@ -146,7 +148,10 @@ class UpdateTaskFragment : Fragment() {
                 dueDate = selectedDueDate ?: task.dueDate,
                 status = status
             )
-            taskViewModel.updateTask(updatedTask)
+            
+            val googleAccount = userViewModel.userResult.value?.googleAccountName
+            taskViewModel.updateTask(updatedTask, googleAccount)
+            
             Toast.makeText(requireContext(), "Task Updated", Toast.LENGTH_SHORT).show()
             findNavController().popBackStack()
         }
@@ -158,7 +163,9 @@ class UpdateTaskFragment : Fragment() {
             .setMessage("Are you sure you want to delete this task?")
             .setPositiveButton("Delete") { _, _ ->
                 currentTask?.let {
-                    taskViewModel.deleteTask(it)
+                    // get account name (email) and pass to delete to delete from correct google account
+                    val googleAccount = userViewModel.userResult.value?.googleAccountName
+                    taskViewModel.deleteTask(it, googleAccount)
                     Toast.makeText(requireContext(), "Task Deleted", Toast.LENGTH_SHORT).show()
                     findNavController().popBackStack()
                 }

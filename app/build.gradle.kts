@@ -43,6 +43,13 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    packaging {
+        resources {
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/INDEX.LIST"
+        }
+    }
 }
 
 dependencies {
@@ -62,6 +69,13 @@ dependencies {
     // Lifecycle
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
+
+    // Google Auth, Calendar, and Tasks
+    implementation(libs.play.services.auth)
+    implementation(libs.google.api.client.android)
+    implementation(libs.google.api.services.calendar)
+    implementation(libs.google.api.services.tasks)
+    implementation(libs.google.http.client.gson)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

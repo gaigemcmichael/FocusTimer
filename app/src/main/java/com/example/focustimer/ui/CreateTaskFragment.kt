@@ -8,9 +8,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.focustimer.data.viewmodel.TaskViewModel
+import com.example.focustimer.data.viewmodel.UserViewModel
 import com.example.focustimer.databinding.FragmentCreateTaskBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -24,7 +25,9 @@ class CreateTaskFragment : Fragment() {
     private var _binding: FragmentCreateTaskBinding? = null
     private val binding get() = _binding!!
 
-    private val taskViewModel: TaskViewModel by viewModels()
+    private val taskViewModel: TaskViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
+    
     private var selectedDueDate: Date? = null
     private val calendar = Calendar.getInstance()
 
@@ -89,7 +92,13 @@ class CreateTaskFragment : Fragment() {
             return
         }
 
-        taskViewModel.addTask(title, description, selectedDueDate!!)
+        val currentUser = userViewModel.userResult.value
+        val googleAccount = currentUser?.googleAccountName
+        
+        Log.d(TAG, "Saving task. Current user: ${currentUser?.username}, Google account: $googleAccount")
+        
+        taskViewModel.addTask(title, description, selectedDueDate!!, googleAccount)
+        
         Toast.makeText(requireContext(), "Task Saved", Toast.LENGTH_SHORT).show()
         findNavController().popBackStack()
     }

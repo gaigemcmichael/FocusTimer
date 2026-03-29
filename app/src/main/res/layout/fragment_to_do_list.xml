@@ -31,6 +31,20 @@
         app:layout_constraintTop_toBottomOf="@id/to_do_list_title"
         tools:listitem="@layout/item_task" />
 
+    <TextView
+        android:id="@+id/noTasksText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_tasks"
+        android:textSize="18sp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/taskRecyclerView"
+        app:layout_constraintEnd_toEndOf="@id/taskRecyclerView"
+        app:layout_constraintStart_toStartOf="@id/taskRecyclerView"
+        app:layout_constraintTop_toTopOf="@id/taskRecyclerView"
+        tools:visibility="visible" />
+
     <Button
         android:id="@+id/add_task_button"
         android:layout_width="0dp"

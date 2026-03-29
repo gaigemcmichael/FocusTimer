@@ -44,6 +44,7 @@ class CompletedTasksFragment : Fragment() {
         binding.completedTaskRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         taskViewModel.completedTasks.observe(viewLifecycleOwner) { tasks ->
+            binding.noCompletedTasksText.visibility = if (tasks.isEmpty()) View.VISIBLE else View.GONE
             val adapter = CompletedTaskAdapter(tasks)
             binding.completedTaskRecyclerView.swapAdapter(adapter, true)
         }

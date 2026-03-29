@@ -1,12 +1,15 @@
 package com.example.focustimer.data.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.focustimer.data.FocusTimerApplication
 import com.example.focustimer.data.model.User
 import kotlinx.coroutines.launch
+
+private const val TAG = "UserViewModel"
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -52,6 +55,21 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             repository.deleteUser(user)
             userResult.value = null
             deleteSuccess.value = true
+        }
+    }
+
+    fun linkGoogleAccount(googleAccountName: String) {
+        Log.d(TAG, "linkGoogleAccount called with: $googleAccountName")
+        viewModelScope.launch {
+            val currentUser = userResult.value
+            if (currentUser != null) {
+                val updatedUser = currentUser.copy(googleAccountName = googleAccountName)
+                repository.updateUser(updatedUser)
+                userResult.value = updatedUser
+                Log.d(TAG, "Successfully linked account: $googleAccountName to user: ${currentUser.username}")
+            } else {
+                Log.e(TAG, "Cannot link account: userResult.value is NULL")
+            }
         }
     }
 }
