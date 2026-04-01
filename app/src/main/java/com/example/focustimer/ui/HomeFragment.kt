@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.example.focustimer.R
 import com.example.focustimer.data.viewmodel.TaskViewModel
@@ -65,6 +66,10 @@ class HomeFragment : Fragment() {
             findNavController().navigate(R.id.action_homeFragment_to_updateUserFragment)
         }
 
+        binding.logOutButton.setOnClickListener {
+            logOut()
+        }
+
         binding.deleteAccountButton.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("Delete Account")
@@ -86,6 +91,22 @@ class HomeFragment : Fragment() {
                 findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
             }
         }
+    }
+
+    private fun logOut() {
+        userViewModel.userResult.value = null
+        taskViewModel.setCurrentUser(null)
+        
+        Toast.makeText(requireContext(), "Logged out", Toast.LENGTH_SHORT).show()
+        
+        // Navigate back to login and clear home from backstack
+        findNavController().navigate(
+            R.id.action_homeFragment_to_loginFragment,
+            null,
+            NavOptions.Builder()
+                .setPopUpTo(R.id.homeFragment, true)
+                .build()
+        )
     }
 
     override fun onDestroyView() {
