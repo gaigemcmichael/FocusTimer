@@ -34,6 +34,9 @@
         <action
             android:id="@+id/action_homeFragment_to_toDoListFragment"
             app:destination="@id/toDoListFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_sessionHistoryFragment"
+            app:destination="@id/sessionHistoryFragment" />
     </fragment>
 
     <fragment
@@ -56,7 +59,20 @@
     <fragment
         android:id="@+id/focusSelectionFragment"
         android:name="com.example.focustimer.ui.FocusSelectionFragment"
-        android:label="Focus Session" />
+        android:label="Focus Session">
+        <action
+            android:id="@+id/action_focusSelectionFragment_to_timerFragment"
+            app:destination="@id/timerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/timerFragment"
+        android:name="com.example.focustimer.ui.TimerFragment"
+        android:label="Timer" >
+        <argument
+            android:name="timerType"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/toDoListFragment"
@@ -95,5 +111,10 @@
             android:id="@+id/action_completedTasksFragment_to_updateTaskFragment"
             app:destination="@id/updateTaskFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/sessionHistoryFragment"
+        android:name="com.example.focustimer.ui.SessionHistoryFragment"
+        android:label="Session History" />
 
 </navigation>

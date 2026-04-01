@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.focustimer.databinding.FragmentFocusSelectionBinding
 
 private const val TAG = "FocusSelectionFragment"
@@ -35,16 +36,21 @@ class FocusSelectionFragment : Fragment() {
         Log.d(TAG, "FocusSelectionFragment onViewCreated() called")
 
         binding.classicButton.setOnClickListener {
-            // Handle Classic selection
+            navigateToTimer("Classic")
         }
 
         binding.pomodoroButton.setOnClickListener {
-            // Handle Pomodoro selection
+            navigateToTimer("Pomodoro")
         }
 
         binding.flowmodoroButton.setOnClickListener {
-            // Handle Flowmodoro selection
+            navigateToTimer("Flowmodoro")
         }
+    }
+
+    private fun navigateToTimer(type: String) {
+        val action = FocusSelectionFragmentDirections.actionFocusSelectionFragmentToTimerFragment(type)
+        findNavController().navigate(action)
     }
 
     override fun onDestroyView() {

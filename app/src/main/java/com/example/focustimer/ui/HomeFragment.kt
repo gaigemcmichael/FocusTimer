@@ -5,16 +5,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.NavOptions
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.focustimer.R
-import com.example.focustimer.data.viewmodel.TaskViewModel
+import com.example.focustimer.data.FocusTimerApplication
 import com.example.focustimer.data.viewmodel.UserViewModel
 import com.example.focustimer.databinding.FragmentHomeBinding
+import kotlinx.coroutines.launch
+import java.util.Calendar
+import java.util.Date
 
 private const val TAG = "HomeFragment"
 
@@ -23,8 +24,8 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private val userViewModel: UserViewModel by activityViewModels()
-    private val taskViewModel: TaskViewModel by activityViewModels()
+    // Use activityViewModels to share the ViewModel with Login/SignUp
+    private val viewModel: UserViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,18 +41,15 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "HomeFragment onViewCreated() called")
 
-        userViewModel.userResult.observe(viewLifecycleOwner) { user ->
+        // Observe the userResult to update UI
+        viewModel.userResult.observe(viewLifecycleOwner) { user ->
             if (user != null) {
-                // Extract only the first name (word) from the user's name
-                val firstName = user.name.split(" ").firstOrNull() ?: ""
-                binding.welcomeText.text = getString(R.string.home_page_focus_message, firstName)
+                binding.welcomeText.text = getString(R.string.home_page_focus_message, user.name)
+                loadDashboardStats(user.username)
             } else {
-                Log.d(TAG, "User is null in HomeFragment")
+                // If user is null, navigate back to login (security check)
+                findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
             }
-        }
-
-        taskViewModel.tasksDueNextWeek.observe(viewLifecycleOwner) { count ->
-            binding.homePageTasksMessage.text = getString(R.string.home_page_tasks_message, count)
         }
 
         binding.startAFocusSessionButton.setOnClickListener {
@@ -62,51 +60,69 @@ class HomeFragment : Fragment() {
             findNavController().navigate(R.id.action_homeFragment_to_toDoListFragment)
         }
 
+        binding.sessionHistoryButton.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_sessionHistoryFragment)
+        }
+
         binding.updateAccountButton.setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_updateUserFragment)
         }
 
-        binding.logOutButton.setOnClickListener {
-            logOut()
-        }
-
         binding.deleteAccountButton.setOnClickListener {
-            AlertDialog.Builder(requireContext())
-                .setTitle("Delete Account")
-                .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
-                .setPositiveButton("Delete") { _, _ ->
-                    userViewModel.userResult.value?.let { user ->
-                        taskViewModel.deleteUserTasks(user.username)
-                        userViewModel.deleteUser(user)
-                    }
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
+            val user = viewModel.userResult.value
+            if (user != null) {
+                viewModel.deleteUser(user)
+            }
         }
 
-        userViewModel.deleteSuccess.observe(viewLifecycleOwner) { success ->
+        binding.logOutButton.setOnClickListener {
+            viewModel.userResult.value = null
+            // Navigation handled by the observer
+        }
+
+        viewModel.deleteSuccess.observe(viewLifecycleOwner) { success ->
             if (success) {
-                userViewModel.deleteSuccess.value = false
-                Toast.makeText(requireContext(), "Account deleted successfully", Toast.LENGTH_SHORT).show()
                 findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
             }
         }
     }
 
-    private fun logOut() {
-        userViewModel.userResult.value = null
-        taskViewModel.setCurrentUser(null)
-        
-        Toast.makeText(requireContext(), "Logged out", Toast.LENGTH_SHORT).show()
-        
-        // Navigate back to login and clear home from backstack
-        findNavController().navigate(
-            R.id.action_homeFragment_to_loginFragment,
-            null,
-            NavOptions.Builder()
-                .setPopUpTo(R.id.homeFragment, true)
-                .build()
-        )
+    private fun loadDashboardStats(username: String) {
+        val app = requireActivity().application as FocusTimerApplication
+        val timerRepo = app.timerRepository
+        val taskRepo = app.taskRepository
+
+        lifecycleScope.launch {
+            // 1. Calculate Average Focus Score
+            val sessions = timerRepo.getSessionsByUsername(username)
+            val averageScore = if (sessions.isNotEmpty()) {
+                sessions.map { it.focusScore }.average().toInt()
+            } else {
+                0
+            }
+            binding.homePageFocusScoreText.text = getString(R.string.home_page_focus_score_message, averageScore)
+
+            // 2. Calculate Tasks Due in Next Week
+            val tasks = taskRepo.getIncompleteTasks(username)
+            
+            // Set 'now' to the beginning of today (00:00:00) to include tasks due today
+            val calendar = Calendar.getInstance()
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            val startOfToday = calendar.time
+
+            // Set the end of the range to 7 days from now (inclusive of that 7th day)
+            calendar.add(Calendar.DAY_OF_YEAR, 8) 
+            val endOfNextWeek = calendar.time
+
+            val tasksDueNextWeek = tasks.count { 
+                val dueDate = it.dueDate
+                !dueDate.before(startOfToday) && dueDate.before(endOfNextWeek)
+            }
+            binding.homePageTasksMessage.text = getString(R.string.home_page_tasks_message, tasksDueNextWeek)
+        }
     }
 
     override fun onDestroyView() {

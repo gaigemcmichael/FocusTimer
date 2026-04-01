@@ -40,7 +40,16 @@
         android:text="@string/to_do_list"
         android:textSize="20sp"/>
 
+    <Button
+        android:id="@+id/session_history_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/session_history_button"
+        android:textSize="20sp"
+        android:backgroundTint="?attr/colorPrimaryVariant" />
+
     <TextView
+        android:id="@+id/home_page_focus_score_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/home_page_focus_score_message"
