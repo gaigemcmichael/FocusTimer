@@ -68,4 +68,5 @@
     <string name="session_score_label">Score: %1$d</string>
     <string name="session_duration_label">Duration: %1$02d:%2$02d</string>
     <string name="session_details_label">Rounds: %1$d | Pickups: %2$d</string>
+    <string name="end_session_button_text">End Session</string>
 </resources>

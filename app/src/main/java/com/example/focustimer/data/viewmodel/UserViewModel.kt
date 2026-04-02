@@ -14,6 +14,7 @@ private const val TAG = "UserViewModel"
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = (application as FocusTimerApplication).repository
+    private val taskRepository = (application as FocusTimerApplication).taskRepository
 
     val userResult = MutableLiveData<User?>()
     val errorMessage = MutableLiveData<String?>()
@@ -52,6 +53,9 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteUser(user: User) {
         viewModelScope.launch {
+            // Delete user's tasks first
+            taskRepository.deleteTasksByUserId(user.username)
+            // Then delete the user
             repository.deleteUser(user)
             userResult.value = null
             deleteSuccess.value = true

@@ -18,6 +18,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.focustimer.R
 import com.example.focustimer.data.FocusTimerApplication
@@ -112,12 +113,15 @@ class TimerFragment : Fragment(), SensorEventListener {
             }
             resetTimer(timerType)
         }
+
+        binding.endSessionButton.setOnClickListener {
+            saveFocusSession(navigateToHome = true)
+        }
     }
 
     private fun setupTimerDisplay(type: String) {
         when (type) {
             "Pomodoro" -> {
-                // Change 25 to 1 for testing
                 timeLeftInMillis = 25 * 60 * 1000L
                 initialTimeInMillis = timeLeftInMillis
                 isBreak = false
@@ -222,33 +226,22 @@ class TimerFragment : Fragment(), SensorEventListener {
         }.start()
 
         isTimerRunning = true
-        if (args.timerType == "Pomodoro") {
-            binding.startPauseButton.setText(if (isBreak) R.string.pause_button_text else R.string.pause_button_text)
-        } else {
-            binding.startPauseButton.setText(R.string.pause_button_text)
-        }
+        binding.startPauseButton.setText(R.string.pause_button_text)
     }
 
     private fun handlePomodoroFinish() {
         if (!isBreak) {
-            // Focus session finished
             roundsCompleted++
             isBreak = true
             
             if (roundsCompleted % 4 == 0) {
-                // Long break after 4 focus sessions
-                // Change 25 to 1 for testing
                 timeLeftInMillis = 25 * 60 * 1000L
             } else {
-                // Short break
-                // Change 5 to 1 for testing
                 timeLeftInMillis = 5 * 60 * 1000L
             }
             binding.startPauseButton.setText(R.string.break_button_text)
         } else {
-            // Break finished, back to focus
             isBreak = false
-            // Change 25 to one for testing
             timeLeftInMillis = 25 * 60 * 1000L
             binding.startPauseButton.setText(R.string.focus_button_text)
         }
@@ -262,13 +255,35 @@ class TimerFragment : Fragment(), SensorEventListener {
         binding.startPauseButton.setText(R.string.resume_button_text)
     }
 
-    private fun saveFocusSession() {
-        val currentUser = userViewModel.userResult.value?.username ?: return
-        val start = sessionStartTime ?: return
+    private fun saveFocusSession(navigateToHome: Boolean = false) {
+        val currentUser = userViewModel.userResult.value?.username
+        val start = sessionStartTime
+
+        if (currentUser == null) {
+            Log.e(TAG, "Save failed: No user logged in")
+            if (navigateToHome) {
+                if (findNavController().currentDestination?.id == R.id.timerFragment) {
+                    findNavController().navigate(R.id.action_timerFragment_to_homeFragment)
+                }
+            }
+            return
+        }
+
+        if (start == null) {
+            Log.d(TAG, "Save skipped: No session start time (timer never started)")
+            if (navigateToHome) {
+                if (findNavController().currentDestination?.id == R.id.timerFragment) {
+                    findNavController().navigate(R.id.action_timerFragment_to_homeFragment)
+                }
+            }
+            return
+        }
+
         val end = Date()
         val score = max(0, 100 - (pickupCount * 10))
         val finalRounds = roundsCompleted
-        
+        val timerType = args.timerType
+
         val session = FocusSession(
             startTime = start,
             endTime = end,
@@ -277,13 +292,29 @@ class TimerFragment : Fragment(), SensorEventListener {
             focusScore = score,
             numRounds = finalRounds,
             userName = currentUser,
-            focusMethodId = args.timerType.uppercase()
+            focusMethodId = timerType.uppercase()
         )
 
+        // Clear session state immediately so it's not saved again
+        sessionStartTime = null
+
         lifecycleScope.launch {
-            (requireActivity().application as FocusTimerApplication).timerRepository.insertSession(session)
-            Log.d(TAG, "Focus Session Saved: $session")
-            Toast.makeText(requireContext(), "Session logged! Rounds: $finalRounds, Score: $score", Toast.LENGTH_SHORT).show()
+            try {
+                (requireActivity().application as FocusTimerApplication).timerRepository.insertSession(session)
+                Log.d(TAG, "Focus Session Saved successfully: $session")
+
+                context?.let {
+                    Toast.makeText(it, "Session logged! Rounds: $finalRounds, Score: $score", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving focus session", e)
+            } finally {
+                if (navigateToHome) {
+                    if (findNavController().currentDestination?.id == R.id.timerFragment) {
+                        findNavController().navigate(R.id.action_timerFragment_to_homeFragment)
+                    }
+                }
+            }
         }
     }
 
@@ -314,7 +345,6 @@ class TimerFragment : Fragment(), SensorEventListener {
             updateDisplay(0)
             binding.startPauseButton.setText(R.string.start_focus_button_text)
         } else {
-            // Change 25 to 1 for testing
             timeLeftInMillis = 25 * 60 * 1000L
             updateCountDownText()
             binding.startPauseButton.setText(R.string.focus_button_text)

@@ -15,7 +15,6 @@ import com.example.focustimer.data.viewmodel.UserViewModel
 import com.example.focustimer.databinding.FragmentHomeBinding
 import kotlinx.coroutines.launch
 import java.util.Calendar
-import java.util.Date
 
 private const val TAG = "HomeFragment"
 
@@ -47,8 +46,10 @@ class HomeFragment : Fragment() {
                 binding.welcomeText.text = getString(R.string.home_page_focus_message, user.name)
                 loadDashboardStats(user.username)
             } else {
-                // If user is null, navigate back to login (security check)
-                findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
+                // If user is null and we are still on HomeFragment, navigate back to login
+                if (findNavController().currentDestination?.id == R.id.homeFragment) {
+                    findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
+                }
             }
         }
 
@@ -77,12 +78,16 @@ class HomeFragment : Fragment() {
 
         binding.logOutButton.setOnClickListener {
             viewModel.userResult.value = null
-            // Navigation handled by the observer
+            // Navigation handled by the userResult observer
         }
 
         viewModel.deleteSuccess.observe(viewLifecycleOwner) { success ->
             if (success) {
-                findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
+                // Reset the flag so it doesn't trigger again on configuration change
+                viewModel.deleteSuccess.value = false
+                if (findNavController().currentDestination?.id == R.id.homeFragment) {
+                    findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
+                }
             }
         }
     }
