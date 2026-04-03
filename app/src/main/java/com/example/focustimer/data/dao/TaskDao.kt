@@ -33,6 +33,12 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE id = :taskId")
     suspend fun getTaskById(taskId: Int): Task?
 
+    @Query("SELECT * FROM tasks WHERE id = :taskId")
+    fun getTaskByIdLiveData(taskId: Int): LiveData<Task?>
+
+    @Query("SELECT * FROM tasks WHERE googleEventId = :googleId LIMIT 1")
+    suspend fun getTaskByGoogleId(googleId: String): Task?
+
     @Query("DELETE FROM tasks WHERE userId = :userId")
     suspend fun deleteTasksByUserId(userId: String)
 }

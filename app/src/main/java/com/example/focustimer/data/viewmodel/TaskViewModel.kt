@@ -6,13 +6,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.switchMap
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.example.focustimer.data.FocusTimerApplication
 import com.example.focustimer.data.model.Task
 import com.example.focustimer.data.model.TaskStatus
 import kotlinx.coroutines.launch
-import java.util.Calendar
 import java.util.Date
 import java.util.concurrent.ConcurrentHashMap
 
@@ -26,6 +24,8 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _currentUserId = MutableLiveData<String?>()
     private val pushingTasks = ConcurrentHashMap.newKeySet<Int>()
+    private val updatingTasks = ConcurrentHashMap.newKeySet<Int>()
+    private val deletingGoogleIds = ConcurrentHashMap.newKeySet<String>()
 
     val incompleteTasks: LiveData<List<Task>> = _currentUserId.switchMap { userId ->
         if (userId == null) MutableLiveData(emptyList())
@@ -37,16 +37,12 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         else repository.getCompletedTasksLiveData(userId)
     }
 
-    val tasksDueNextWeek: LiveData<Int> = incompleteTasks.map { list ->
-        val calendar = Calendar.getInstance()
-        val now = calendar.time
-        calendar.add(Calendar.DAY_OF_YEAR, 7)
-        val nextWeek = calendar.time
-        list.count { it.dueDate in now..nextWeek }
-    }
 
-    private val _taskToUpdate = MutableLiveData<Task?>()
-    val taskToUpdate: LiveData<Task?> get() = _taskToUpdate
+
+    private val _taskIdToUpdate = MutableLiveData<Int>()
+    val taskToUpdate: LiveData<Task?> = _taskIdToUpdate.switchMap { id ->
+        repository.getTaskByIdLiveData(id)
+    }
 
     fun setCurrentUser(userId: String?) {
         _currentUserId.value = userId
@@ -93,19 +89,29 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         Log.d(TAG, "Syncing with Google Tasks for: $googleAccount")
         viewModelScope.launch {
             try {
-                // Pull tasks from Calendar
-                // Pass the userId to fetchGoogleTasks so it can correctly construct Task objects
+                // Pull tasks from Google
                 val remoteTasks = tasksService.fetchGoogleTasks(googleAccount, userId)
-                remoteTasks.forEach { task ->
-                    repository.insert(task)
+                remoteTasks.forEach { remoteTask ->
+                    val googleId = remoteTask.googleEventId
+                    // Safety check: Don't re-insert tasks that are currently being deleted
+                    if (googleId != null && !deletingGoogleIds.contains(googleId)) {
+                        val existingLocalTask = repository.getTaskByGoogleId(googleId)
+                        if (existingLocalTask != null) {
+                            // Don't overwrite tasks that are currently being updated or pushed
+                            if (!updatingTasks.contains(existingLocalTask.id) && !pushingTasks.contains(existingLocalTask.id)) {
+                                // Preserving local ID so UI/ViewModels holding references don't break
+                                repository.update(remoteTask.copy(id = existingLocalTask.id))
+                            }
+                        } else {
+                            repository.insert(remoteTask)
+                        }
+                    }
                 }
 
                 // Push existing tasks in Room db without remoteId to calendar
                 val localTasks = repository.getIncompleteTasks(userId)
                 localTasks.forEach { task ->
                     if (task.googleEventId == null) {
-                        // Check if this task title already exists in the remoteTasks we just fetched
-                        // to prevent creating duplicates on Calendar
                         val alreadyOnGoogle = remoteTasks.any {
                             it.title.equals(task.title, ignoreCase = true)
                         }
@@ -121,32 +127,55 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadTaskById(taskId: Int) {
-        viewModelScope.launch {
-            _taskToUpdate.value = repository.getTaskById(taskId)
-        }
+        _taskIdToUpdate.value = taskId
     }
 
     fun updateTask(task: Task, googleAccount: String? = null) {
+        if (!updatingTasks.add(task.id)) return // Already being updated
+
         viewModelScope.launch {
-            repository.update(task)
-            if (googleAccount != null && task.googleEventId != null) {
-                tasksService.updateGoogleTask(googleAccount, task)
+            try {
+                repository.update(task)
+                if (googleAccount != null && task.googleEventId != null) {
+                    tasksService.updateGoogleTask(googleAccount, task)
+                }
+            } finally {
+                updatingTasks.remove(task.id)
             }
         }
     }
 
     fun deleteTask(task: Task, googleAccount: String? = null) {
+        val googleId = task.googleEventId
+        if (googleId != null) {
+            deletingGoogleIds.add(googleId)
+        }
+        
         viewModelScope.launch {
-            repository.delete(task)
-            if (googleAccount != null && task.googleEventId != null) {
-                tasksService.deleteGoogleTask(googleAccount, task.googleEventId)
+            try {
+                // 1. Delete by primary key
+                repository.delete(task)
+                
+                // 2. Extra safety: If it has a Google ID, ensure it's gone locally 
+                // even if the passed 'task' had a stale primary key ID.
+                if (googleId != null) {
+                    val localTask = repository.getTaskByGoogleId(googleId)
+                    if (localTask != null) {
+                        repository.delete(localTask)
+                    }
+                    
+                    // 3. Delete from Google
+                    if (googleAccount != null) {
+                        tasksService.deleteGoogleTask(googleAccount, googleId)
+                    }
+                }
+            } finally {
+                if (googleId != null) {
+                    deletingGoogleIds.remove(googleId)
+                }
             }
         }
     }
 
-    fun deleteUserTasks(userId: String) {
-        viewModelScope.launch {
-            repository.deleteTasksByUserId(userId)
-        }
-    }
+
 }

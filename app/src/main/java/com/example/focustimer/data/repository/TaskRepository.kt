@@ -30,8 +30,13 @@ class TaskRepository(private val taskDao: TaskDao) {
         taskDao.deleteTask(task)
     }
 
-    suspend fun getTaskById(taskId: Int): Task? {
-        return taskDao.getTaskById(taskId)
+
+    fun getTaskByIdLiveData(taskId: Int): LiveData<Task?> {
+        return taskDao.getTaskByIdLiveData(taskId)
+    }
+
+    suspend fun getTaskByGoogleId(googleId: String): Task? {
+        return taskDao.getTaskByGoogleId(googleId)
     }
 
     suspend fun deleteTasksByUserId(userId: String) {
