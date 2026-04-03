@@ -14,6 +14,7 @@ import com.example.focustimer.data.model.TaskStatus
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
+import java.util.concurrent.ConcurrentHashMap
 
 private const val TAG = "TaskViewModel"
 
@@ -24,6 +25,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val tasksService = app.googleTasksService
 
     private val _currentUserId = MutableLiveData<String?>()
+    private val pushingTasks = ConcurrentHashMap.newKeySet<Int>()
 
     val incompleteTasks: LiveData<List<Task>> = _currentUserId.switchMap { userId ->
         if (userId == null) MutableLiveData(emptyList())
@@ -62,13 +64,26 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                 status = TaskStatus.NEW
             )
             
-            val taskId = repository.insert(newTask)
+            val taskId = repository.insert(newTask).toInt()
             
             if (googleAccount != null) {
-                val remoteId = tasksService.pushTaskToGoogle(googleAccount, newTask)
+                pushTaskToGoogleSafely(googleAccount, newTask.copy(id = taskId))
+            }
+        }
+    }
+
+    private fun pushTaskToGoogleSafely(googleAccount: String, task: Task) {
+        if (task.id == 0 || task.googleEventId != null) return
+        if (!pushingTasks.add(task.id)) return // Already being pushed
+
+        viewModelScope.launch {
+            try {
+                val remoteId = tasksService.pushTaskToGoogle(googleAccount, task)
                 if (remoteId != null) {
-                    repository.update(newTask.copy(id = taskId.toInt(), googleEventId = remoteId))
+                    repository.update(task.copy(googleEventId = remoteId))
                 }
+            } finally {
+                pushingTasks.remove(task.id)
             }
         }
     }
@@ -95,10 +110,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                             it.title.equals(task.title, ignoreCase = true)
                         }
                         if (!alreadyOnGoogle) {
-                            val remoteId = tasksService.pushTaskToGoogle(googleAccount, task)
-                            if (remoteId != null) {
-                                repository.update(task.copy(googleEventId = remoteId))
-                            }
+                            pushTaskToGoogleSafely(googleAccount, task)
                         }
                     }
                 }
