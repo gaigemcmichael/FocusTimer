@@ -12,6 +12,7 @@ import com.google.api.services.tasks.Tasks
 import com.google.api.services.tasks.TasksScopes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.Calendar
 import java.util.Date
 
 private const val TAG = "GoogleTasksService"
@@ -31,6 +32,19 @@ class GoogleTasksService(private val context: Context) {
             .build()
     }
 
+    /**
+     * Normalizes a date to midnight in the LOCAL timezone to prevent UTC shifts.
+     */
+    private fun normalizeToLocalMidnight(date: Date): Date {
+        val calendar = Calendar.getInstance()
+        calendar.time = date
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.time
+    }
+
     suspend fun fetchGoogleTasks(accountName: String, userId: String): List<Task> = withContext(Dispatchers.IO) {
         try {
             Log.d(TAG, "Fetching tasks for: $accountName")
@@ -40,13 +54,17 @@ class GoogleTasksService(private val context: Context) {
 
             Log.d(TAG, "Fetched ${tasks.items?.size ?: 0} tasks")
             tasks.items?.map { googleTask ->
+                val googleDate = googleTask.due?.let { Date(DateTime.parseRfc3339(it).value) } ?: Date()
+                
+                // Google returns UTC midnight, normalize it to local midnight to avoid shifting days
+                val localDate = normalizeToLocalMidnight(googleDate)
+
                 Task(
                     userId = userId,
                     title = googleTask.title ?: "No Title",
                     description = googleTask.notes ?: "",
                     createDate = Date(),
-                    // Google Tasks 'due' is an RFC 3339 timestamp string
-                    dueDate = googleTask.due?.let { Date(DateTime.parseRfc3339(it).value) } ?: Date(),
+                    dueDate = localDate,
                     status = if (googleTask.status == "completed") TaskStatus.COMPLETED else TaskStatus.NEW,
                     googleEventId = googleTask.id
                 )
@@ -65,7 +83,7 @@ class GoogleTasksService(private val context: Context) {
             val googleTask = com.google.api.services.tasks.model.Task().apply {
                 title = task.title
                 notes = task.description
-                // Ensure date is in RFC 3339 format string
+                // Google Tasks API only stores the DATE portion.
                 due = DateTime(task.dueDate).toStringRfc3339()
                 status = if (task.status == TaskStatus.COMPLETED) "completed" else "needsAction"
             }
@@ -79,13 +97,13 @@ class GoogleTasksService(private val context: Context) {
         }
     }
 
-    suspend fun updateGoogleTask(accountName: String, task: Task) = withContext(Dispatchers.IO) {
+    suspend fun updateGoogleTask(accountName: String, task: Task): Unit = withContext(Dispatchers.IO) {
         val googleEventId = task.googleEventId ?: return@withContext
         try {
-            Log.d(TAG, "Updating task in Google Tasks: ${task.title}")
+            Log.d(TAG, "Patching task in Google Tasks: ${task.title}")
             val service = getTasksService(accountName)
             
-            val googleTask = service.tasks().get("@default", googleEventId).execute().apply {
+            val taskPatch = com.google.api.services.tasks.model.Task().apply {
                 title = task.title
                 notes = task.description
                 due = DateTime(task.dueDate).toStringRfc3339()
@@ -95,7 +113,7 @@ class GoogleTasksService(private val context: Context) {
                 }
             }
 
-            service.tasks().update("@default", googleEventId, googleTask).execute()
+            service.tasks().patch("@default", googleEventId, taskPatch).execute()
         } catch (e: Exception) {
             Log.e(TAG, "Error updating task", e)
         }
