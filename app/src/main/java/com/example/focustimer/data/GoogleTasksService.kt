@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.Date
+import java.util.TimeZone
 
 private const val TAG = "GoogleTasksService"
 
@@ -33,16 +34,43 @@ class GoogleTasksService(private val context: Context) {
     }
 
     /**
-     * Normalizes a date to midnight in the LOCAL timezone to prevent UTC shifts.
+     * Normalizes a date to midnight in the LOCAL timezone.
+     * Google Tasks due dates are returned as UTC midnight (e.g., 2023-10-10T00:00:00Z).
+     * In negative timezones, converting this directly to local time shifts it to the previous day
+     * (e.g., Oct 9th 19:00 in UTC-5). We extract the year/month/day in UTC and apply it locally.
      */
     private fun normalizeToLocalMidnight(date: Date): Date {
-        val calendar = Calendar.getInstance()
-        calendar.time = date
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        return calendar.time
+        val utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        utcCalendar.time = date
+        
+        val localCalendar = Calendar.getInstance()
+        localCalendar.set(
+            utcCalendar.get(Calendar.YEAR),
+            utcCalendar.get(Calendar.MONTH),
+            utcCalendar.get(Calendar.DAY_OF_MONTH),
+            0, 0, 0
+        )
+        localCalendar.set(Calendar.MILLISECOND, 0)
+        return localCalendar.time
+    }
+
+    /**
+     * Formats a local date to UTC midnight for Google Tasks API.
+     * This ensures the "day" selected by the user is preserved regardless of timezone offsets.
+     */
+    private fun formatDueDate(date: Date): String {
+        val localCalendar = Calendar.getInstance()
+        localCalendar.time = date
+        
+        val utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        utcCalendar.set(
+            localCalendar.get(Calendar.YEAR),
+            localCalendar.get(Calendar.MONTH),
+            localCalendar.get(Calendar.DAY_OF_MONTH),
+            0, 0, 0
+        )
+        utcCalendar.set(Calendar.MILLISECOND, 0)
+        return DateTime(utcCalendar.time, TimeZone.getTimeZone("UTC")).toStringRfc3339()
     }
 
     suspend fun fetchGoogleTasks(accountName: String, userId: String): List<Task> = withContext(Dispatchers.IO) {
@@ -84,7 +112,7 @@ class GoogleTasksService(private val context: Context) {
                 title = task.title
                 notes = task.description
                 // Google Tasks API only stores the DATE portion.
-                due = DateTime(task.dueDate).toStringRfc3339()
+                due = formatDueDate(task.dueDate)
                 status = if (task.status == TaskStatus.COMPLETED) "completed" else "needsAction"
             }
 
@@ -106,7 +134,7 @@ class GoogleTasksService(private val context: Context) {
             val taskPatch = com.google.api.services.tasks.model.Task().apply {
                 title = task.title
                 notes = task.description
-                due = DateTime(task.dueDate).toStringRfc3339()
+                due = formatDueDate(task.dueDate)
                 status = if (task.status == TaskStatus.COMPLETED) "completed" else "needsAction"
                 if (task.status == TaskStatus.COMPLETED) {
                     completed = DateTime(System.currentTimeMillis()).toStringRfc3339()
