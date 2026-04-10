@@ -87,7 +87,13 @@ class SessionHistoryFragment : Fragment() {
             private val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
 
             fun bind(session: FocusSession) {
-                itemBinding.sessionMethod.text = session.focusMethodId
+                itemBinding.sessionMethod.text = when(session.focusMethodId.uppercase()) {
+                    "CLASSIC" -> getString(R.string.classic_method)
+                    "POMODORO" -> getString(R.string.pomodoro_method)
+                    "FLOWMODORO" -> getString(R.string.flowmodoro_method)
+                    else -> session.focusMethodId
+                }
+
                 itemBinding.sessionScore.text = getString(R.string.session_score_label, session.focusScore)
                 itemBinding.sessionDate.text = dateFormat.format(session.startTime)
                 

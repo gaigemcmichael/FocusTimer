@@ -78,6 +78,7 @@ class TimerFragment : Fragment(), SensorEventListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d(TAG, "TimerFragment onCreateView() called")
         _binding = FragmentTimerBinding.inflate(inflater, container, false)
         sensorManager = requireContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -86,9 +87,12 @@ class TimerFragment : Fragment(), SensorEventListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "TimerFragment onViewCreated() called")
         
         val timerType = args.timerType
-        binding.timerTypeLabel.text = timerType
+        
+        // Display localized timer type
+        binding.timerTypeLabel.text = getLocalizedTimerType(timerType)
         
         updatePickupCountDisplay()
         setupTimerDisplay(timerType)
@@ -116,6 +120,15 @@ class TimerFragment : Fragment(), SensorEventListener {
 
         binding.endSessionButton.setOnClickListener {
             saveFocusSession(navigateToHome = true)
+        }
+    }
+
+    private fun getLocalizedTimerType(type: String): String {
+        return when (type) {
+            "Classic" -> getString(R.string.classic_method)
+            "Pomodoro" -> getString(R.string.pomodoro_method)
+            "Flowmodoro" -> getString(R.string.flowmodoro_method)
+            else -> type
         }
     }
 
@@ -353,6 +366,7 @@ class TimerFragment : Fragment(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
+        Log.d(TAG, "TimerFragment onResume() called")
         accelerometer?.also { acc ->
             sensorManager.registerListener(this, acc, SensorManager.SENSOR_DELAY_NORMAL)
         }
@@ -360,7 +374,23 @@ class TimerFragment : Fragment(), SensorEventListener {
 
     override fun onPause() {
         super.onPause()
+        Log.d(TAG, "TimerFragment onPause() called")
         sensorManager.unregisterListener(this)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "TimerFragment onStart() called")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "TimerFragment onStop() called")
+    }
+
+    override fun onDestroy() {
+        Log.d(TAG, "TimerFragment onDestroy() called")
+        super.onDestroy()
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
@@ -403,6 +433,7 @@ class TimerFragment : Fragment(), SensorEventListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        Log.d(TAG, "TimerFragment onDestroyView() called")
         if (sessionStartTime != null) {
             saveFocusSession()
         }
