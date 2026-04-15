@@ -80,11 +80,15 @@ dependencies {
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
     ksp(libs.androidx.room.compiler)
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
+
+    // Paging
+    implementation(libs.androidx.paging.runtime)
 
     // Google Auth, Calendar, and Tasks
     implementation(libs.play.services.auth)
