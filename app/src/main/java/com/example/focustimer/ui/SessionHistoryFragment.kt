@@ -52,11 +52,7 @@ class SessionHistoryFragment : Fragment() {
             observeSessions(username)
         }
 
-        binding.seedDataButton.setOnClickListener {
-            userViewModel.seedDummySessions()
-        }
-
-        // Observe userResult to refresh when seeding is done or user changes
+        // Observe userResult to refresh if user changes
         userViewModel.userResult.observe(viewLifecycleOwner) { user ->
             user?.username?.let { observeSessions(it) }
         }

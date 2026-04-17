@@ -82,6 +82,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // Remove in final product, might use for testing performance again
     fun seedDummySessions() {
         val currentUser = userResult.value ?: return
         viewModelScope.launch {
